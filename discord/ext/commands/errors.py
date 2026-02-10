@@ -185,7 +185,7 @@ class MissingRequiredArgument(UserInputError):
 
     def __init__(self, param: Parameter) -> None:
         self.param: Parameter = param
-        super().__init__(f'{param.displayed_name or param.name} is a required argument that is missing.')
+        super().__init__(f'**{param.displayed_name or param.name}** is a required argument that is missing')
 
 
 class MissingRequiredAttachment(UserInputError):
@@ -204,7 +204,7 @@ class MissingRequiredAttachment(UserInputError):
 
     def __init__(self, param: Parameter) -> None:
         self.param: Parameter = param
-        super().__init__(f'{param.displayed_name or param.name} is a required argument that is missing an attachment.')
+        super().__init__(f'{param.displayed_name or param.name} is a required argument that is missing an **attachment**')
 
 
 class TooManyArguments(UserInputError):
@@ -254,7 +254,7 @@ class CheckAnyFailure(Generic[BotT], CheckFailure):
     def __init__(self, checks: List[Callable[[Context[BotT]], bool]], errors: List[CheckFailure]) -> None:
         self.checks: List[Callable[[Context[BotT]], bool]] = checks
         self.errors: List[CheckFailure] = errors
-        super().__init__('You do not have permission to run this command.')
+        super().__init__('You don\'t have **permission** to invoke this command')
 
 
 class PrivateMessageOnly(CheckFailure):
@@ -323,7 +323,7 @@ class MemberNotFound(BadArgument):
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f'Member "{argument}" not found.')
+        super().__init__(f'I wasn\'t able to find that **member**, try providing an ID or mention')
 
 
 class GuildNotFound(BadArgument):
@@ -341,7 +341,7 @@ class GuildNotFound(BadArgument):
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f'Guild "{argument}" not found.')
+        super().__init__(f'I wasn\'t able to find that **guild**')
 
 
 class UserNotFound(BadArgument):
@@ -360,7 +360,7 @@ class UserNotFound(BadArgument):
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f'User "{argument}" not found.')
+        super().__init__(f'I wasn\'t able to find that **user**, try providing an ID or mention')
 
 
 class MessageNotFound(BadArgument):
@@ -378,7 +378,7 @@ class MessageNotFound(BadArgument):
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f'Message "{argument}" not found.')
+        super().__init__(f'I wasn\'t able to find that **message**')
 
 
 class ChannelNotReadable(BadArgument):
@@ -415,7 +415,7 @@ class ChannelNotFound(BadArgument):
 
     def __init__(self, argument: Union[int, str]) -> None:
         self.argument: Union[int, str] = argument
-        super().__init__(f'Channel "{argument}" not found.')
+        super().__init__(f'I wasn\'t able to find that **channel**, try providing an ID or mention')
 
 
 class ThreadNotFound(BadArgument):
@@ -433,7 +433,7 @@ class ThreadNotFound(BadArgument):
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f'Thread "{argument}" not found.')
+        super().__init__(f'I wasn\'t able to find that **thread**, try providing an ID or mention')
 
 
 class BadColourArgument(BadArgument):
@@ -451,7 +451,7 @@ class BadColourArgument(BadArgument):
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f'Colour "{argument}" is invalid.')
+        super().__init__(f'`{argument}` is not a valid **colour**')
 
 
 BadColorArgument = BadColourArgument
@@ -472,7 +472,7 @@ class RoleNotFound(BadArgument):
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f'Role "{argument}" not found.')
+        super().__init__(f'I wasn\'t able to find that **role**, try providing an ID or mention')
 
 
 class BadInviteArgument(BadArgument):
@@ -490,7 +490,7 @@ class BadInviteArgument(BadArgument):
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f'Invite "{argument}" is invalid or expired.')
+        super().__init__(f'`{argument}` is not a valid **invite**, maybe it has expired')
 
 
 class EmojiNotFound(BadArgument):
@@ -508,7 +508,7 @@ class EmojiNotFound(BadArgument):
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f'Emoji "{argument}" not found.')
+        super().__init__(f'I wasn\'t able to find that **emoji**, try providing one from this server')
 
 
 class PartialEmojiConversionFailure(BadArgument):
@@ -527,7 +527,7 @@ class PartialEmojiConversionFailure(BadArgument):
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f'Couldn\'t convert "{argument}" to PartialEmoji.')
+        super().__init__(f'`{argument!r}` does not match the format of a partial emoji, it should be in the form of `<name:id>`')
 
 
 class GuildStickerNotFound(BadArgument):
@@ -545,7 +545,7 @@ class GuildStickerNotFound(BadArgument):
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f'Sticker "{argument}" not found.')
+        super().__init__(f'I wasn\'t able to find that **sticker**')
 
 
 class ScheduledEventNotFound(BadArgument):
@@ -581,7 +581,7 @@ class SoundboardSoundNotFound(BadArgument):
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f'SoundboardSound "{argument}" not found.')
+        super().__init__(f'I wasn\'t able to find that **soundboard sound**')
 
 
 class BadBoolArgument(BadArgument):
@@ -599,7 +599,7 @@ class BadBoolArgument(BadArgument):
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f'{argument} is not a recognised boolean option')
+        super().__init__(f'`{argument!r}` is not a valid **boolean** argument')
 
 
 class RangeError(BadArgument):
@@ -645,7 +645,7 @@ class RangeError(BadArgument):
             else:
                 value = f'{count} characters'
 
-        super().__init__(f'value must be {label} but received {value}')
+        super().__init__(f'`{value}` is out of **range**, expected `{label}`')
 
 
 class DisabledCommand(CommandError):
@@ -694,7 +694,7 @@ class CommandOnCooldown(CommandError):
         self.cooldown: Cooldown = cooldown
         self.retry_after: float = retry_after
         self.type: BucketType = type
-        super().__init__(f'You are on cooldown. Try again in {retry_after:.2f}s')
+        super().__init__(f'You are on **cooldown**, try again in `{retry_after:.2f}s`')
 
 
 class MaxConcurrencyReached(CommandError):
@@ -717,7 +717,7 @@ class MaxConcurrencyReached(CommandError):
         suffix = 'per %s' % name if per.name != 'default' else 'globally'
         plural = '%s times %s' if number > 1 else '%s time %s'
         fmt = plural % (number, suffix)
-        super().__init__(f'Too many people are using this command. It can only be used {fmt} concurrently.')
+        super().__init__(f'Too many people are using this command, it can only be used `{fmt}` concurrently')
 
 
 class MissingRole(CheckFailure):
@@ -736,7 +736,7 @@ class MissingRole(CheckFailure):
 
     def __init__(self, missing_role: Snowflake) -> None:
         self.missing_role: Snowflake = missing_role
-        message = f'Role {missing_role!r} is required to run this command.'
+        message = f'You require the role `{missing_role!r}` to invoke this command'
         super().__init__(message)
 
 
@@ -756,7 +756,7 @@ class BotMissingRole(CheckFailure):
 
     def __init__(self, missing_role: Snowflake) -> None:
         self.missing_role: Snowflake = missing_role
-        message = f'Bot requires the role {missing_role!r} to run this command'
+        message = f'I require the role `{missing_role!r}` to invoke this command'
         super().__init__(message)
 
 
@@ -780,8 +780,7 @@ class MissingAnyRole(CheckFailure):
 
         missing = [f"'{role}'" for role in missing_roles]
         fmt = _human_join(missing)
-        message = f'You are missing at least one of the required roles: {fmt}'
-        super().__init__(message)
+        super().__init__(f'You are **missing** at least one of the required roles: `{fmt}`')
 
 
 class BotMissingAnyRole(CheckFailure):
@@ -805,8 +804,7 @@ class BotMissingAnyRole(CheckFailure):
 
         missing = [f"'{role}'" for role in missing_roles]
         fmt = _human_join(missing)
-        message = f'Bot is missing at least one of the required roles: {fmt}'
-        super().__init__(message)
+        super().__init__(f'I am **missing** at least one of the required roles: `{fmt}`')
 
 
 class NSFWChannelRequired(CheckFailure):
@@ -824,7 +822,7 @@ class NSFWChannelRequired(CheckFailure):
 
     def __init__(self, channel: Union[GuildChannel, Thread]) -> None:
         self.channel: Union[GuildChannel, Thread] = channel
-        super().__init__(f"Channel '{channel}' needs to be NSFW for this command to work.")
+        super().__init__(f"{channel.mention} is not an **NSFW** channel, this command requires an **NSFW** channel")
 
 
 class MissingPermissions(CheckFailure):
@@ -844,8 +842,7 @@ class MissingPermissions(CheckFailure):
 
         missing = [perm.replace('_', ' ').replace('guild', 'server').title() for perm in missing_permissions]
         fmt = _human_join(missing, final='and')
-        message = f'You are missing {fmt} permission(s) to run this command.'
-        super().__init__(message, *args)
+        super().__init__(f'You are missing `{fmt}` permission(s) to invoke this command', *args)
 
 
 class BotMissingPermissions(CheckFailure):
@@ -865,8 +862,7 @@ class BotMissingPermissions(CheckFailure):
 
         missing = [perm.replace('_', ' ').replace('guild', 'server').title() for perm in missing_permissions]
         fmt = _human_join(missing, final='and')
-        message = f'Bot requires {fmt} permission(s) to run this command.'
-        super().__init__(message, *args)
+        super().__init__(f'I am missing `{fmt}` permission(s) to invoke this command', *args)
 
 
 class BadUnionArgument(UserInputError):
@@ -900,7 +896,7 @@ class BadUnionArgument(UserInputError):
 
         to_string = [_get_name(x) for x in converters]
         fmt = _human_join(to_string)
-        super().__init__(f'Could not convert "{param.displayed_name or param.name}" into {fmt}.')
+        super().__init__(f'Unable to **convert** "{param.displayed_name or param.name}" into {fmt}')
 
 
 class BadLiteralArgument(UserInputError):
@@ -933,7 +929,7 @@ class BadLiteralArgument(UserInputError):
 
         to_string = [repr(l) for l in literals]
         fmt = _human_join(to_string)
-        super().__init__(f'Could not convert "{param.displayed_name or param.name}" into the literal {fmt}.')
+        super().__init__(f'Unable to **convert** "{param.displayed_name or param.name}" into the literal {fmt}.')
 
 
 class ArgumentParsingError(UserInputError):
@@ -1137,7 +1133,7 @@ class TooManyFlags(FlagError):
     def __init__(self, flag: Flag, values: List[str]) -> None:
         self.flag: Flag = flag
         self.values: List[str] = values
-        super().__init__(f'Too many flag values, expected {flag.max_args} but received {len(values)}.')
+        super().__init__(f'Too many **flag** values, expected `{flag.max_args}` but received {len(values)}.')
 
 
 class BadFlagArgument(FlagError):
@@ -1168,7 +1164,7 @@ class BadFlagArgument(FlagError):
         self.argument: str = argument
         self.original: Exception = original
 
-        super().__init__(f'Could not convert to {name!r} for flag {flag.name!r}')
+        super().__init__(f'Unable to **convert** flag {flag.name!r}\'s argument "{argument}" into {name}')
 
 
 class MissingRequiredFlag(FlagError):
@@ -1186,7 +1182,7 @@ class MissingRequiredFlag(FlagError):
 
     def __init__(self, flag: Flag) -> None:
         self.flag: Flag = flag
-        super().__init__(f'Flag {flag.name!r} is required and missing')
+        super().__init__(f'You are missing the required flag **{flag.name!r}**')
 
 
 class MissingFlagArgument(FlagError):
@@ -1204,7 +1200,7 @@ class MissingFlagArgument(FlagError):
 
     def __init__(self, flag: Flag) -> None:
         self.flag: Flag = flag
-        super().__init__(f'Flag {flag.name!r} does not have an argument')
+        super().__init__(f'Flag **{flag.name!r}** did not receive a value')
 
 
 class HybridCommandError(CommandError):

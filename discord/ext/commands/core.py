@@ -1243,16 +1243,16 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             # parameter signature is a literal list of it's values
             if origin is Literal:
                 name = '|'.join(f'"{v}"' if isinstance(v, str) else str(v) for v in annotation.__args__)
-            if not param.required:
-                # We don't want None or '' to trigger the [name=value] case and instead it should
-                # do [name] since [name=None] or [name=] are not exactly useful for the user.
-                if param.displayed_default:
-                    result.append(
-                        f'[{name}={param.displayed_default}]' if not greedy else f'[{name}={param.displayed_default}]...'
-                    )
-                    continue
-                else:
-                    result.append(f'[{name}]')
+            # if not param.required:
+            #     # We don't want None or '' to trigger the [name=value] case and instead it should
+            #     # do [name] since [name=None] or [name=] are not exactly useful for the user.
+            #     if param.displayed_default:
+            #         result.append(
+            #             f'[{name}={param.displayed_default}]' if not greedy else f'[{name}={param.displayed_default}]...'
+            #         )
+            #         continue
+            #     else:
+                result.append(f'[{name}]')
 
             elif param.kind == param.VAR_POSITIONAL:
                 if self.require_var_positional:

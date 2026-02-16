@@ -623,8 +623,8 @@ class HelpCommand:
             The string to use when the command did not have the subcommand requested.
         """
         if isinstance(command, Group) and len(command.all_commands) > 0:
-            return f'Command "{command.qualified_name}" has no subcommand named {string}'
-        return f'Command "{command.qualified_name}" has no subcommands.'
+            return f'Command `{command.qualified_name}` has no subcommand `{string}`'
+        return f'Command `{command.qualified_name}` has no subcommands'
 
     async def filter_commands(
         self,
@@ -1367,6 +1367,7 @@ class MinimalHelpCommand(HelpCommand):
         self.dm_help: Optional[bool] = options.pop('dm_help', False)
         self.dm_help_threshold: int = options.pop('dm_help_threshold', 1000)
         self.aliases_heading: str = options.pop('aliases_heading', 'Aliases:')
+        self.example_heading: str = options.pop('example_heading', 'Example:')
         self.no_category: str = options.pop('no_category', 'No Category')
 
         paginator = options.pop('paginator', None)
@@ -1486,6 +1487,24 @@ class MinimalHelpCommand(HelpCommand):
         """
         self.paginator.add_line(f'**{self.aliases_heading}** {", ".join(aliases)}', empty=True)
 
+    def add_example_formatting(self, example: str, /) -> None:
+        """Adds the formatting information on a command's example.
+
+        The formatting should be added to the :attr:`paginator`.
+
+        The default implementation is the example string indented by
+        :attr:`indent` spaces and shortened to fit into the :attr:`width`.
+
+        .. versionadded:: 2.0
+
+        Parameters
+        -----------
+        example: :class:`str`
+            The example string to format.
+        """
+        self.paginator.add_line(f'**{self.example_heading}** {example}', empty=True)
+
+
     def add_command_formatting(self, command: Command[Any, ..., Any], /) -> None:
         """A utility function to format commands and groups.
 
@@ -1508,6 +1527,9 @@ class MinimalHelpCommand(HelpCommand):
             self.add_aliases_formatting(command.aliases)
         else:
             self.paginator.add_line(signature, empty=True)
+        
+        if command.example:
+            self.add_example_formatting(command.example)
 
         if command.help:
             try:

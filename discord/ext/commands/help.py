@@ -1391,8 +1391,8 @@ class MinimalHelpCommand(HelpCommand):
 
         The default implementation returns ::
 
-            Use `{prefix}{command_name} [command]` for more info on a command.
-            You can also use `{prefix}{command_name} [category]` for more info on a category.
+            Use `{prefix}{command_name} (command)` for more info on a command
+            You can also use `{prefix}{command_name} (category)` for more info on a category
 
         Returns
         -------
@@ -1401,8 +1401,8 @@ class MinimalHelpCommand(HelpCommand):
         """
         command_name = self.invoked_with
         return (
-            f'Use `{self.context.clean_prefix}{command_name} [command]` for more info on a command.\n'
-            f'You can also use `{self.context.clean_prefix}{command_name} [category]` for more info on a category.'
+            f'Use `{self.context.clean_prefix}{command_name} (command)` for more info on a command\n'
+            f'You can also use `{self.context.clean_prefix}{command_name} (category)` for more info on a category'
         )
 
     def get_command_signature(self, command: Command[Any, ..., Any], /) -> str:
@@ -1442,7 +1442,7 @@ class MinimalHelpCommand(HelpCommand):
         if commands:
             # U+2002 Middle Dot
             joined = '\u2002'.join(c.name for c in commands)
-            self.paginator.add_line(f'__**{heading}**__')
+            self.paginator.add_line(f'**{heading}**')
             self.paginator.add_line(joined)
 
     def add_subcommand_formatting(self, command: Command[Any, ..., Any], /) -> None:

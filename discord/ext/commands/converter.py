@@ -182,73 +182,96 @@ class ObjectConverter(IDConverter[discord.Object]):
 
 
 class MemberConverter(IDConverter[discord.Member]):
-    """Converts to a :class:`~discord.Member`.
+    """
+    Converts a string argument to a :class:`discord.Member` with full lookup support,
+    including partial name matching.
 
-    All lookups are via the local guild. If in a DM context, then the lookup
-    is done by the global cache.
-
-    The lookup strategy is as follows (in order):
+    Lookup strategy (in order):
 
     1. Lookup by ID.
     2. Lookup by mention.
-    3. Lookup by username#discriminator (deprecated).
-    4. Lookup by username#0 (deprecated, only gets users that migrated from their discriminator).
-    5. Lookup by user name.
-    6. Lookup by global name.
-    7. Lookup by guild nickname.
+    3. Lookup by username#discriminator (deprecated in Discord API).
+    4. Lookup by username#0 (deprecated, only applies to migrated accounts).
+    5. Exact username match.
+    6. Exact global name match.
+    7. Exact nickname match.
+    8. Partial (case-insensitive) match on username, global name, or nickname.
 
-    .. versionchanged:: 1.5
-         Raise :exc:`.MemberNotFound` instead of generic :exc:`.BadArgument`
-
-    .. versionchanged:: 1.5.1
-        This converter now lazily fetches members from the gateway and HTTP APIs,
-        optionally caching the result if :attr:`.MemberCacheFlags.joined` is enabled.
-
-    .. deprecated:: 2.3
-        Looking up users by discriminator will be removed in a future version due to
-        the removal of discriminators in an API change.
+    Notes:
+        - If multiple partial matches exist, the first one found is returned.
+        - Falls back to partial matches only if no exact match is found.
+        - Raises :class:`MemberNotFound` if no member matches the argument.
     """
 
     async def query_member_named(self, guild: discord.Guild, argument: str) -> Optional[discord.Member]:
+        """Query members by name with exact and partial fallback."""
         cache = guild._state.member_cache_flags.joined
         username, _, discriminator = argument.rpartition('#')
 
-        # If # isn't found then "discriminator" actually has the username
         if not username:
             discriminator, username = username, discriminator
 
+        members = await guild.query_members(argument, limit=100, cache=cache)
+
         if discriminator == '0' or (len(discriminator) == 4 and discriminator.isdigit()):
-            lookup = username
-            predicate = lambda m: m.name == username and m.discriminator == discriminator
-        else:
-            lookup = argument
-            predicate = lambda m: m.name == argument or m.global_name == argument or m.nick == argument
+            for m in members:
+                if m.name == username and m.discriminator == discriminator:
+                    return m
 
-        members = await guild.query_members(lookup, limit=100, cache=cache)
-        return discord.utils.find(predicate, members)
+        for m in members:
+            if m.name == argument:
+                return m
 
-    async def query_member_by_id(self, bot: _Bot, guild: discord.Guild, user_id: int) -> Optional[discord.Member]:
+        for m in members:
+            if m.global_name == argument:
+                return m
+
+        for m in members:
+            if m.nick == argument:
+                return m
+
+        arg_lower = argument.lower()
+        for m in members:
+            if (
+                (m.name and arg_lower in m.name.lower()) or
+                (m.global_name and arg_lower in m.global_name.lower()) or
+                (m.nick and arg_lower in m.nick.lower())
+            ):
+                return m
+
+        return None
+
+    async def query_member_by_id(self, bot: "discord.Bot", guild: discord.Guild, user_id: int) -> Optional[discord.Member]:
+        """Query a member by ID with rate limit fallback."""
         ws = bot._get_websocket(shard_id=guild.shard_id)
         cache = guild._state.member_cache_flags.joined
+
         if ws.is_ratelimited():
-            # If we're being rate limited on the WS, then fall back to using the HTTP API
-            # So we don't have to wait ~60 seconds for the query to finish
             try:
                 member = await guild.fetch_member(user_id)
             except discord.HTTPException:
                 return None
-
             if cache:
                 guild._add_member(member)
             return member
 
-        # If we're not being rate limited then we can use the websocket to actually query
         members = await guild.query_members(limit=1, user_ids=[user_id], cache=cache)
         if not members:
             return None
         return members[0]
 
-    async def convert(self, ctx: Context[BotT], argument: str) -> discord.Member:
+    async def convert(self, ctx: "discord.Context", argument: str) -> discord.Member:
+        """
+        Converts a string argument to a discord.Member.
+
+        Handles:
+        - IDs
+        - Mentions
+        - username#discriminator
+        - username#0
+        - Exact username/global name/nickname
+        - Partial matching
+        """
         bot = ctx.bot
         match = self._get_id_match(argument) or re.match(r'<@!?([0-9]{15,20})>$', argument)
         guild = ctx.guild
@@ -256,17 +279,16 @@ class MemberConverter(IDConverter[discord.Member]):
         user_id = None
 
         if match is None:
-            # not a mention...
             if guild:
-                result = guild.get_member_named(argument)
+                result = await self.query_member_named(guild, argument)
             else:
-                result = _get_from_guilds(bot, 'get_member_named', argument)
+                result = None
         else:
             user_id = int(match.group(1))
             if guild:
-                result = guild.get_member(user_id) or _utils_get(ctx.message.mentions, id=user_id)
+                result = guild.get_member(user_id) or discord.utils.get(ctx.message.mentions, id=user_id)
             else:
-                result = _get_from_guilds(bot, 'get_member', user_id)
+                result = None
 
         if not isinstance(result, discord.Member):
             if guild is None:
@@ -296,6 +318,7 @@ class UserConverter(IDConverter[discord.User]):
     4. Lookup by username#0 (deprecated, only gets users that migrated from their discriminator).
     5. Lookup by user name.
     6. Lookup by global name.
+    7. Partial matching on username or global name (case-insensitive, returns first match).
 
     .. versionchanged:: 1.5
          Raise :exc:`.UserNotFound` instead of generic :exc:`.BadArgument`
@@ -316,7 +339,7 @@ class UserConverter(IDConverter[discord.User]):
 
         if match is not None:
             user_id = int(match.group(1))
-            result = ctx.bot.get_user(user_id) or _utils_get(ctx.message.mentions, id=user_id)
+            result = ctx.bot.get_user(user_id) or discord.utils.get(ctx.message.mentions, id=user_id)
             if result is None:
                 try:
                     result = await ctx.bot.fetch_user(user_id)
@@ -327,7 +350,6 @@ class UserConverter(IDConverter[discord.User]):
 
         username, _, discriminator = argument.rpartition('#')
 
-        # If # isn't found then "discriminator" actually has the username
         if not username:
             discriminator, username = username, discriminator
 
@@ -337,6 +359,14 @@ class UserConverter(IDConverter[discord.User]):
             predicate = lambda u: u.name == argument or u.global_name == argument
 
         result = discord.utils.find(predicate, state._users.values())
+        
+        if result is None:
+            arg_lower = argument.lower()
+            for u in state._users.values():
+                if (u.name and arg_lower in u.name.lower()) or (u.global_name and arg_lower in u.global_name.lower()):
+                    result = u
+                    break
+
         if result is None:
             raise UserNotFound(argument)
 

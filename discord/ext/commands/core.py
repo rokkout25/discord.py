@@ -427,7 +427,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         /,
         **kwargs: Unpack[_CommandKwargs],
     ) -> None:
-        if not asyncio.iscoroutinefunction(func):
+        if not discord.utils._iscoroutinefunction(func):
             raise TypeError('Callback must be a coroutine.')
 
         name = kwargs.get('name') or func.__name__
@@ -1104,7 +1104,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             The coroutine passed is not actually a coroutine.
         """
 
-        if not asyncio.iscoroutinefunction(coro):
+        if not discord.utils._iscoroutinefunction(coro):
             raise TypeError('The error handler must be a coroutine.')
 
         self.on_error: Error[CogT, Any] = coro
@@ -1142,7 +1142,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not discord.utils._iscoroutinefunction(coro):
             raise TypeError('The pre-invoke hook must be a coroutine.')
 
         self._before_invoke = coro
@@ -1173,7 +1173,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not discord.utils._iscoroutinefunction(coro):
             raise TypeError('The post-invoke hook must be a coroutine.')
 
         self._after_invoke = coro
@@ -1947,7 +1947,7 @@ def check(predicate: UserCheck[ContextT], /) -> Check[ContextT]:
 
         return func
 
-    if inspect.iscoroutinefunction(predicate):
+    if discord.utils._iscoroutinefunction(predicate):
         decorator.predicate = predicate
     else:
 
@@ -2371,7 +2371,7 @@ def guild_only() -> Check[Any]:
 
         return func
 
-    if inspect.iscoroutinefunction(predicate):
+    if discord.utils._iscoroutinefunction(predicate):
         decorator.predicate = predicate
     else:
 
@@ -2446,7 +2446,7 @@ def is_nsfw() -> Check[Any]:
 
         return func
 
-    if inspect.iscoroutinefunction(predicate):
+    if discord.utils._iscoroutinefunction(predicate):
         decorator.predicate = predicate
     else:
 
